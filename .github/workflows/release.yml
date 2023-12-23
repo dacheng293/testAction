@@ -9,6 +9,7 @@ jobs:
     runs-on: macos-latest
     env:
       API_VERSION: 'v0.3'
+      TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     strategy:
       matrix:
         go-version: [1.21.1]  # Add more Go versions if needed
@@ -60,7 +61,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ env.TOKEN }}
           files: |
             bin/vcr_darwin_amd64.tar.gz
             bin/vcr_darwin_arm64.tar.gz
