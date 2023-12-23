@@ -46,7 +46,7 @@ jobs:
 
       - name: Cross compile binaries
         env:
-          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.apiVersion=${{variables.apiVersion}}' -X 'github.com/dacheng293/testAction/main.version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.releaseUrl=https://api.github.com/${{github.repository}}'"
+          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.apiVersion=${{vars.APIVERSION}}' -X 'github.com/dacheng293/testAction/main.version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.releaseUrl=https://api.github.com/${{github.repository}}'"
         run: |
           GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_amd64 .
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_arm64 .
