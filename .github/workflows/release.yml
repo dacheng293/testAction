@@ -60,6 +60,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           files: |
             bin/vcr_darwin_amd64.tar.gz
             bin/vcr_darwin_arm64.tar.gz
