@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-const (
-	apiVersion = "v0.3"
-	version    = "dev"
-	buildDate  = "2021-09-01T00:00:00Z"
-	commit     = "0000"
-	releaseUrl = "https://api.github.com/repos/cli/cli"
+var (
+	ApiVersion = "v0.3"
+	Version    = "dev"
+	BuildDate  = "2021-09-01T00:00:00Z"
+	Commit     = "0000"
+	ReleaseUrl = "https://api.github.com/repos/cli/cli"
 )
 
 // Sum calculates the sum of two integers.
@@ -27,9 +27,9 @@ func main() {
 	s.Stop()
 
 	fmt.Println("Sum of 5 and 7 is:", Sum(5, 7))
-	fmt.Println("API version:", apiVersion)
-	fmt.Println("Version:", version)
-	fmt.Println("Build date:", buildDate)
-	fmt.Println("Commit:", commit)
-	fmt.Println("Release URL:", releaseUrl)
+	fmt.Println("API version:", ApiVersion)
+	fmt.Println("Version:", Version)
+	fmt.Println("Build date:", BuildDate)
+	fmt.Println("Commit:", Commit)
+	fmt.Println("Release URL:", ReleaseUrl)
 }
