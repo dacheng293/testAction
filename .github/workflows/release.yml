@@ -46,6 +46,16 @@ jobs:
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_amd64 .
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_windows_amd64.exe .
 
+      - name: Code sign darwin binaries
+        run: |
+          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_amd64
+          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_arm64
+
+      - name: Check code signing
+        run: |
+          codesign -vvv --deep --strict ./vcr_darwin_amd64
+          codesign -vvv --deep --strict ./vcr_darwin_arm64
+
       - name: Compress binaries
         run: |
           mkdir bin
@@ -59,7 +69,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
