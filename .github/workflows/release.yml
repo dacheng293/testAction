@@ -9,12 +9,12 @@ jobs:
     runs-on: macos-latest
     env:
       API_VERSION: 'v0.3'
-      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     strategy:
       matrix:
         go-version: [1.21.1]  # Add more Go versions if needed
         os: [macos-latest]  # Add more operating systems if needed
-
+    environment: testAction
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
