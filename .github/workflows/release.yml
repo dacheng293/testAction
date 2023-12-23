@@ -5,63 +5,48 @@ on:
       - '*'
 
 jobs:
-  lint:
-    runs-on: macOS-latest
-    steps:
-      - uses: nexmoinc/neru-actions/go-lint@master
-        with:
-          git-username: ${{ secrets.USER_NAME }}
-          git-access-token: ${{ secrets.ACCESS_TOKEN }}
-          version: 1.21
-          dir: ${{ env.PROJ_DIR }}
+  build-and-release:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        go-version: [1.21.1]  # Add more Go versions if needed
+        os: [macos-latest]  # Add more operating systems if needed
 
-  unit-test:
-    runs-on: macOS-latest
     steps:
-      - uses: nexmoinc/neru-actions/go-test@master
-        with:
-          git-username: ${{ secrets.USER_NAME }}
-          git-access-token: ${{ secrets.ACCESS_TOKEN }}
-          version: 1.21
-          dir: ${{ env.PROJ_DIR }}
-
-  build:
-    needs: [ unit-test ]
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: apple-actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.APPLE_CERT_P12_BASE64_ENCODED }}
-          p12-password: ${{ secrets.APPLE_CERT_PASSWORD }}
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.21.1
+          go-version: ${{ matrix.go-version }}
+        # Setting up a specific version of Go for consistency and reproducibility
 
-      - name: Set up cache
-        uses: actions/cache@v3
+      - name: Cache Go modules
+        uses: actions/cache@v2
         with:
           path: |
-            ~/.cache/go-build
             ~/go/pkg/mod
+            ~/Library/Caches/go-build
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+        # Caching dependencies to speed up the build process
 
-      - name: Configure git for private modules
+      - name: Install private dependencies
         env:
-          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        run: git config --global url."https://sichan-vonage:${TOKEN}@github.com".insteadOf "https://github.com"
-
-      - name: Store credentials
+          TOKEN: ${{ secrets.TOKEN }}
         run: |
-          xcrun notarytool store-credentials --apple-id "devrel@vonage.com" --team-id 7F2B5ZSP8Q --password ${{ secrets.APPLE_DEV_ID_PASSWORD }} devrel
+          git config --global url."https://dacheng293:${TOKEN}@github.com/".insteadOf "https://github.com/"
+          go mod tidy
+        # Handling private dependencies securely
+
+      - name: Run unit tests
+        run: go test ./...
 
       - name: Cross compile binaries
         env:
-          GO_LDFLAGS: "-s -w -X 'github.com/nexmoinc/vcr-cli/main.apiVersion=${{variables.apiVersion}}' -X 'github.com/nexmoinc/vcr-cli/main.version=${{github.ref_name}}' -X 'github.com/nexmoinc/vcr-cli/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/nexmoinc/vcr-cli/main.commit=${{github.sha}}' -X 'github.com/nexmoinc/vcr-cli/main.releaseUrl=https://api.github.com/${{github.repository}}'"
+          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.apiVersion=${{variables.apiVersion}}' -X 'github.com/dacheng293/testAction/main.version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.releaseUrl=https://api.github.com/${{github.repository}}'"
         run: |
           GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_amd64 .
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_arm64 .
@@ -69,27 +54,7 @@ jobs:
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_amd64 .
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_windows_amd64.exe .
 
-      - name: Code sign darwin binaries
-        run: |
-          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_amd64
-          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_arm64
-
-      - name: Check code signing
-        run: |
-          codesign -vvv --deep --strict ./vcr_darwin_amd64
-          codesign -vvv --deep --strict ./vcr_darwin_arm64
-
-      - name: Zip darwin binaries
-        run: |
-          zip vcr_darwin_amd64.zip ./vcr_darwin_amd64
-          zip vcr_darwin_arm64.zip ./vcr_darwin_arm64
-
-      - name: Notarize darwin binaries
-        run: |
-          xcrun notarytool submit vcr_darwin_amd64.zip --keychain-profile "devrel" --wait
-          xcrun notarytool submit vcr_darwin_arm64.zip --keychain-profile "devrel" --wait
-
-      - name: Create Compressed Tar
+      - name: Compress binaries
         run: |
           mkdir bin
           tar czf bin/vcr_darwin_amd64.tar.gz ./vcr_darwin_amd64
@@ -98,12 +63,36 @@ jobs:
           tar czf bin/vcr_linux_amd64.tar.gz ./vcr_linux_amd64
           tar czf bin/vcr_windows_amd64.tar.gz ./vcr_windows_amd64.exe
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: |
-            bin/vcr_darwin_amd64.tar.gz
-            bin/vcr_darwin_arm64.tar.gz
-            bin/vcr_linux_arm64.tar.gz
-            bin/vcr_linux_amd64.tar.gz
-            bin/vcr_windows_amd64.tar.gz
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+        # Creating a GitHub release for the tagged commit
+#
+#      - name: Upload Release Asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./bin/vcr_darwin_amd64.tar.gz
+#          asset_name: vcr_darwin_amd64.tar.gz
+#          asset_content_type: application/gzip
+#        # Uploading the binary as a release asset
+#        # Repeat this step for each binary
+#
+#      - name: Notify Slack on Failure
+#        if: failure()
+#        uses: rtCamp/action-slack-notify@v2
+#        env:
+#          SLACK_CHANNEL: your-slack-channel
+#          SLACK_COLOR: 'danger'
+#          SLACK_MESSAGE: 'Build failed: ${{ github.ref }}'
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#        # Sending a notification to Slack if the build fails
