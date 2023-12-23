@@ -7,6 +7,8 @@ on:
 jobs:
   build-and-release:
     runs-on: macos-latest
+    env:
+      API_VERSION: 'v0.3'
     strategy:
       matrix:
         go-version: [1.21.1]  # Add more Go versions if needed
@@ -38,8 +40,7 @@ jobs:
 
       - name: Cross compile binaries
         env:
-          VERSION: ${{ vars.API_VERSION }}
-          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.apiVersion=${VERSION}' -X 'github.com/dacheng293/testAction/main.version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.releaseUrl=https://api.github.com/${{github.repository}}'"
+          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.apiVersion=${{env.API_VERSION}}' -X 'github.com/dacheng293/testAction/main.version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.buildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.releaseUrl=https://api.github.com/${{github.repository}}'"
         run: |
           GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_amd64 .
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_arm64 .
@@ -56,16 +57,15 @@ jobs:
           tar czf bin/vcr_linux_amd64.tar.gz ./vcr_linux_amd64
           tar czf bin/vcr_windows_amd64.tar.gz ./vcr_windows_amd64.exe
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          files: |
+            bin/vcr_darwin_amd64.tar.gz
+            bin/vcr_darwin_arm64.tar.gz
+            bin/vcr_linux_arm64.tar.gz
+            bin/vcr_linux_amd64.tar.gz
+            bin/vcr_windows_amd64.tar.gz
         # Creating a GitHub release for the tagged commit
 #
 #      - name: Upload Release Asset
