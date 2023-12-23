@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-latest
     env:
       API_VERSION: 'v0.3'
-      TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         go-version: [1.21.1]  # Add more Go versions if needed
