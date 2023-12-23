@@ -37,7 +37,6 @@ jobs:
         env:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-#          git config --global url."https://dacheng293:${TOKEN}@github.com/".insteadOf "https://github.com/"
           git config --global url."https://${TOKEN}@github.com/".insteadOf "https://github.com/"
           echo "machine github.com login $TOKEN" >> ~/.netrc
           go env -w GOPRIVATE=github.com/dacheng293
