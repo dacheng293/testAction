@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/briandowns/spinner"
+	"time"
 )
 
 const (
@@ -18,6 +20,12 @@ func Sum(a, b int) int {
 }
 
 func main() {
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Suffix = " Waiting for something to happen..."
+	s.Start()
+	time.Sleep(2 * time.Second)
+	s.Stop()
+
 	fmt.Println("Sum of 5 and 7 is:", Sum(5, 7))
 	fmt.Println("API version:", apiVersion)
 	fmt.Println("Version:", version)
