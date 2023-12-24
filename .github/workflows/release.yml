@@ -41,13 +41,13 @@ jobs:
 
       - name: Cross compile binaries
         env:
-          GO_LDFLAGS: "-s -w -X 'github.com/dacheng293/testAction/main.ApiVersion=${{env.API_VERSION}}' -X 'github.com/dacheng293/testAction/main.Version=${{github.ref_name}}' -X 'github.com/dacheng293/testAction/main.BuildDate=${{github.event.repository.updated_at}}' -X 'github.com/dacheng293/testAction/main.Commit=${{github.sha}}' -X 'github.com/dacheng293/testAction/main.ReleaseUrl=https://api.github.com/${{github.repository}}'"
+          GO_LDFLAGS: "-s -w -X github.com/dacheng293/testAction/main.ApiVersion=${{env.API_VERSION}} -X github.com/dacheng293/testAction/main.Version=${{github.ref_name}} -X github.com/dacheng293/testAction/main.BuildDate=${{github.event.repository.updated_at}} -X github.com/dacheng293/testAction/main.Commit=${{github.sha}} -X github.com/dacheng293/testAction/main.ReleaseUrl=https://api.github.com/${{github.repository}}"
         run: |
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $GO_LDFLAGS -o vcr_darwin_amd64 .
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags $GO_LDFLAGS -o vcr_darwin_arm64 .
-          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags $GO_LDFLAGS -o vcr_linux_arm64 .
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $GO_LDFLAGS -o vcr_linux_amd64 .
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $GO_LDFLAGS -o vcr_windows_amd64.exe .
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_amd64 .
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_darwin_arm64 .
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_arm64 .
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_amd64 .
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_windows_amd64.exe .
 
       - name: Compress binaries
         run: |
