@@ -10,7 +10,7 @@ var (
 	apiVersion = "v0.3"
 	Version    = "dev"
 	BuildDate  = "2021-09-01T00:00:00Z"
-	Commit     = "0020"
+	Commit     = "0030"
 	ReleaseUrl = "https://api.github.com/repos/cli/cli"
 )
 
