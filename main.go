@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	apiVersion = "v0.3"
+	ApiVersion = "v0.3"
 	Version    = "dev"
 	BuildDate  = "2021-09-01T00:00:00Z"
-	Commit     = "0020"
+	Commit     = "0030"
 	ReleaseUrl = "https://api.github.com/repos/cli/cli"
 )
 
@@ -27,7 +27,7 @@ func main() {
 	s.Stop()
 
 	fmt.Println("Sum of 5 and 7 is:", Sum(5, 7))
-	fmt.Println("API version:", apiVersion)
+	fmt.Println("API version:", ApiVersion)
 	fmt.Println("Version:", Version)
 	fmt.Println("Build date:", BuildDate)
 	fmt.Println("Commit:", Commit)
