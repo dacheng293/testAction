@@ -16,8 +16,11 @@ jobs:
         os: [macos-latest]  # Add more operating systems if needed
     environment: testAction
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERT_P12_BASE64_ENCODED }}
+          p12-password: ${{ secrets.APPLE_CERT_PASSWORD }}
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -36,6 +39,10 @@ jobs:
             ${{ runner.os }}-go-
         # Caching dependencies to speed up the build process
 
+      - name: Store credentials
+        run: |
+          xcrun notarytool store-credentials --apple-id "devrel@vonage.com" --team-id 7F2B5ZSP8Q --password ${{ secrets.APPLE_DEV_ID_PASSWORD }} devrel
+
       - name: Run unit tests
         run: go test ./...
 
@@ -48,7 +55,25 @@ jobs:
           GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_arm64 .
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_amd64 .
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_windows_amd64.exe .
+      - name: Code sign darwin binaries
+        run: |
+          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_amd64
+          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_arm64
 
+      - name: Check code signing
+        run: |
+          codesign -vvv --deep --strict ./vcr_darwin_amd64
+          codesign -vvv --deep --strict ./vcr_darwin_arm64
+
+      - name: Zip darwin binaries
+        run: |
+          zip vcr_darwin_amd64.zip ./vcr_darwin_amd64
+          zip vcr_darwin_arm64.zip ./vcr_darwin_arm64
+
+      - name: Notarize darwin binaries
+        run: |
+          xcrun notarytool submit vcr_darwin_amd64.zip --keychain-profile "devrel" --wait
+          xcrun notarytool submit vcr_darwin_arm64.zip --keychain-profile "devrel" --wait
       - name: Compress binaries
         run: |
           mkdir bin
