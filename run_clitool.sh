@@ -2,4 +2,4 @@
 
 sleep 30
 # Run the CLI application
-exit 2
+exit 0
