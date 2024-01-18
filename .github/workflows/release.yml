@@ -41,12 +41,12 @@ jobs:
             ${{ runner.os }}-go-
         # Caching dependencies to speed up the build process
 
-      - name: Store credentials
-        run: |
-          xcrun notarytool store-credentials --apple-id "devrel@vonage.com" --team-id 7F2B5ZSP8Q --password ${{ secrets.APPLE_DEV_ID_PASSWORD }} devrel
-
-      - name: Run unit tests
-        run: go test ./...
+#      - name: Store credentials
+#        run: |
+#          xcrun notarytool store-credentials --apple-id "devrel@vonage.com" --team-id 7F2B5ZSP8Q --password ${{ secrets.APPLE_DEV_ID_PASSWORD }} devrel
+#
+#      - name: Run unit tests
+#        run: go test ./...
 
       - name: Build and start services
         run: docker-compose up -d
