@@ -31,5 +31,4 @@ services:
       context: .
       dockerfile: Dockerfile-clitool
     depends_on:
-      - "mockserver"
       - "graphql-engine"
