@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
         # Setting up a specific version of Go for consistency and reproducibility
       - name: Set up Docker
-        uses: crazy-max/ghaction-setup-docker@v1
+        run: brew install docker docker-compose
 
       - name: Cache Go modules
         uses: actions/cache@v2
