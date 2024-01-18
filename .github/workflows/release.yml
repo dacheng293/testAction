@@ -29,8 +29,8 @@ jobs:
         # Setting up a specific version of Go for consistency and reproducibility
       - name: Set up Docker
         run: |
-          brew install docker docker-compose
-          brew services start docker
+          brew install docker docker-machine docker-compose
+          colima start
 
       - name: Cache Go modules
         uses: actions/cache@v2
