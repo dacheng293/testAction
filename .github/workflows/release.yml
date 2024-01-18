@@ -27,8 +27,8 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
         # Setting up a specific version of Go for consistency and reproducibility
-      - name: Set up Docker Compose
-        uses: docker/setup-buildx-action@v1
+      - name: Set up Docker
+        uses: crazy-max/ghaction-setup-docker@v1
 
       - name: Cache Go modules
         uses: actions/cache@v2
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build and start services
         run: docker-compose up -d
-        
+
       - name: Shutdown and clean up
         run: docker-compose down
 
@@ -78,10 +78,10 @@ jobs:
           zip vcr_darwin_amd64.zip ./vcr_darwin_amd64
           zip vcr_darwin_arm64.zip ./vcr_darwin_arm64
 
-      - name: Notarize darwin binaries
-        run: |
-          xcrun notarytool submit vcr_darwin_amd64.zip --keychain-profile "devrel" --wait
-          xcrun notarytool submit vcr_darwin_arm64.zip --keychain-profile "devrel" --wait
+#      - name: Notarize darwin binaries
+#        run: |
+#          xcrun notarytool submit vcr_darwin_amd64.zip --keychain-profile "devrel" --wait
+#          xcrun notarytool submit vcr_darwin_arm64.zip --keychain-profile "devrel" --wait
       - name: Compress binaries
         run: |
           mkdir bin
