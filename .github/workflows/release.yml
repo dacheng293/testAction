@@ -52,11 +52,10 @@ jobs:
 #      - name: Run unit tests
 #        run: go test ./...
 
-      - name: Build and start services
-        run: docker-compose up
-
-      - name: Shutdown and clean up
-        run: docker-compose down
+      - name: Run integration tests
+        run: |
+          cd tests/integration
+          docker-compose up --exit-code-from cli-tool
 
       - name: Cross compile binaries
         env:
@@ -67,20 +66,20 @@ jobs:
           GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_arm64 .
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_linux_amd64 .
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$GO_LDFLAGS" -o vcr_windows_amd64.exe .
-      - name: Code sign darwin binaries
-        run: |
-          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_amd64
-          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_arm64
-
-      - name: Check code signing
-        run: |
-          codesign -vvv --deep --strict ./vcr_darwin_amd64
-          codesign -vvv --deep --strict ./vcr_darwin_arm64
-
-      - name: Zip darwin binaries
-        run: |
-          zip vcr_darwin_amd64.zip ./vcr_darwin_amd64
-          zip vcr_darwin_arm64.zip ./vcr_darwin_arm64
+#      - name: Code sign darwin binaries
+#        run: |
+#          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_amd64
+#          codesign --timestamp --options=runtime -s "Developer ID Application: Nexmo Inc. (7F2B5ZSP8Q)" -v ./vcr_darwin_arm64
+#
+#      - name: Check code signing
+#        run: |
+#          codesign -vvv --deep --strict ./vcr_darwin_amd64
+#          codesign -vvv --deep --strict ./vcr_darwin_arm64
+#
+#      - name: Zip darwin binaries
+#        run: |
+#          zip vcr_darwin_amd64.zip ./vcr_darwin_amd64
+#          zip vcr_darwin_arm64.zip ./vcr_darwin_arm64
 
 #      - name: Notarize darwin binaries
 #        run: |
