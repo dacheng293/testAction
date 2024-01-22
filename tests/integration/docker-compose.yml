@@ -17,18 +17,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "wait-for-it"
+      - "postgres"
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"  # Set to "false" to disable console
       HASURA_GRAPHQL_DEV_MODE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, query-log, http-log, websocket-log, webhook-log
-  wait-for-it:
-    image: toschneck/wait-for-it:latest
-    command: postgres:5432
+#  wait-for-it:
+#    image: toschneck/wait-for-it:latest
+#    command: postgres:5432
   cli-tool:
     build:
-      context: .
-      dockerfile: Dockerfile-clitool
+      context: ../..
+      dockerfile: tests/integration/Dockerfile-clitool
     depends_on:
       - "graphql-engine"

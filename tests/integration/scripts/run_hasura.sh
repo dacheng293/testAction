@@ -24,6 +24,8 @@ track_table() {
        }'
 }
 
+sleep 5
+
 graphql-engine serve &
 pid=$!
 

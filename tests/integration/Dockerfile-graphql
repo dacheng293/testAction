@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl
 
 # Copy the initialization script
-COPY run_hasura.sh .
+COPY scripts/run_hasura.sh .
 RUN chmod +x /app/run_hasura.sh
 
 CMD ["/app/run_hasura.sh"]

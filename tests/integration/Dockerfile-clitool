@@ -1,0 +1,15 @@
+FROM golang:1.21.1
+
+WORKDIR /app
+
+COPY . .
+
+RUN go mod download
+
+# Build the CLI application
+
+RUN go build -ldflags "-X main.releaseURL=http://mockserver:80" -o vcr-cli /app/main.go
+
+RUN chmod +x /app/tests/integration/scripts/run_clitool.sh
+# Run the script when the container starts
+CMD ["/app/tests/integration/scripts/run_clitool.sh"]
