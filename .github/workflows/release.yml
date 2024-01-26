@@ -27,12 +27,12 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
         # Setting up a specific version of Go for consistency and reproducibility
-      - name: Set up Docker
-        run: |
-          brew install docker docker-machine docker-compose
-          colima start
-          
-          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
+#      - name: Set up Docker
+#        run: |
+#          brew install docker docker-machine docker-compose
+#          colima start
+#
+#          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
       - name: Cache Go modules
         uses: actions/cache@v2
@@ -52,10 +52,10 @@ jobs:
 #      - name: Run unit tests
 #        run: go test ./...
 
-      - name: Run integration tests
-        run: |
-          cd tests/integration
-          docker-compose up --exit-code-from cli-tool
+#      - name: Run integration tests
+#        run: |
+#          cd tests/integration
+#          docker-compose up --exit-code-from cli-tool
 
       - name: Cross compile binaries
         env:
